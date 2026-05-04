@@ -1,5 +1,7 @@
 # Tree of Life
 
+![Demo Video](tree-of-life.png)
+
 Minimal, responsive tree editor with Google sign-in, guest mode, and a D3 collapsible tree inspired by Mike Bostock's Observable reference.
 
 ## Stack
