@@ -91,6 +91,18 @@ button {
   gap: 6px;
 }
 
+.help-button {
+  width: 32px;
+  height: 32px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.help-button:hover,
+.help-button:focus-visible {
+  background: var(--accent-soft);
+}
+
 .account-avatar {
   display: grid;
   width: 30px;
@@ -466,6 +478,102 @@ input {
   background: #fff6f4;
 }
 
+.faq-page {
+  width: min(860px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 34px 0 64px;
+  color: var(--ink);
+}
+
+.faq-header {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-header p,
+.faq-header h1,
+.faq-section h2 {
+  margin: 0;
+}
+
+.faq-header p {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.faq-header h1 {
+  margin-top: 4px;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.faq-back {
+  width: max-content;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.faq-section {
+  display: grid;
+  gap: 14px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-section h2 {
+  font-size: 15px;
+}
+
+.faq-section ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #383631;
+  line-height: 1.45;
+}
+
+.shortcut-list,
+.latex-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.shortcut-list div,
+.latex-list div {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.shortcut-list dt,
+.latex-list dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.shortcut-list dd,
+.latex-list dd {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.faq-page code {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 5px;
+  background: #fafafa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.93em;
+}
+
 @media (max-width: 760px) {
   body {
     overflow: auto;
@@ -508,5 +616,16 @@ input {
 
   .save-state {
     display: none;
+  }
+
+  .faq-page {
+    width: min(100% - 28px, 860px);
+    padding-top: 24px;
+  }
+
+  .shortcut-list div,
+  .latex-list div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
   }
 }

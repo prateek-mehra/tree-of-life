@@ -27,7 +27,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
   const toggleNodeCollapsed = useTreeStore((state) => state.toggleNodeCollapsed);
   const openContextMenu = useTreeStore((state) => state.openContextMenu);
   const startAddingChildNode = useTreeStore((state) => state.startAddingChildNode);
-  const viewNodeAsRoot = useTreeStore((state) => state.viewNodeAsRoot);
+  const startEditingNode = useTreeStore((state) => state.startEditingNode);
   const deleteNode = useTreeStore((state) => state.deleteNode);
 
   useEffect(() => {
@@ -56,27 +56,16 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
       if (isEditingText) return;
 
-      if (event.key === " ") {
-        event.preventDefault();
-        startAddingChildNode(hoveredNodeId);
-        return;
-      }
-
       if ((event.key === "Delete" || event.key === "Backspace") && !event.metaKey) {
         event.preventDefault();
         void deleteNode(hoveredNodeId);
         setHoveredNodeId(null);
-        return;
-      }
-
-      if (event.key === "Meta" && !event.repeat) {
-        viewNodeAsRoot(hoveredNodeId);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteNode, hoveredNodeId, startAddingChildNode, viewNodeAsRoot]);
+  }, [deleteNode, hoveredNodeId]);
 
   useLayoutEffect(() => {
     const svgElement = svgRef.current;
@@ -94,7 +83,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const root = d3.hierarchy(viewRoot) as D3TreeNode;
     const sourceId = lastSourceRef.current;
     const sourcePosition = positionsRef.current.get(sourceId) ?? { x: 0, y: 0 };
-    const duration = nodeCount > 500 ? 0 : nodeCount > 250 ? 120 : 250;
+    const duration = 0;
 
     root.x0 = sourcePosition.x;
     root.y0 = sourcePosition.y;
@@ -126,8 +115,8 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
         .append("g")
         .attr("class", "tree-links")
         .attr("fill", "none")
-        .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.4)
+        .attr("stroke", "#7a4a24")
+        .attr("stroke-opacity", 0.55)
         .attr("stroke-width", 1.5);
     }
 
@@ -177,13 +166,22 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const nodeUpdate = node.merge(nodeEnter);
     updateNodeVisuals(nodeUpdate, collapsedIds);
     nodeUpdate.classed("is-hovered", (d) => d.data.id === hoveredNodeId);
-    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseenter", (event: MouseEvent, d) => {
+    const handleModifierHover = (event: MouseEvent, d: D3TreeNode) => {
       lastSourceRef.current = d.data.id;
       setHoveredNodeId(d.data.id);
-      if (event.metaKey) {
-        viewNodeAsRoot(d.data.id);
+
+      if (event.altKey) {
+        startAddingChildNode(d.data.id);
+        return;
       }
-    });
+
+      if (event.ctrlKey) {
+        startEditingNode(d.data.id);
+      }
+    };
+
+    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseenter", handleModifierHover);
+    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mousemove", handleModifierHover);
     nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseleave", (_event: MouseEvent, d) => {
       setHoveredNodeId((current) => (current === d.data.id ? null : current));
     });
@@ -230,12 +228,13 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
   }, [
     hoveredNodeId,
     openContextMenu,
+    startAddingChildNode,
+    startEditingNode,
     toggleNodeCollapsed,
     tree.collapsedNodeIds,
     tree.currentViewRootNodeId,
     tree.root,
     availableHeight,
-    viewNodeAsRoot,
     viewRoot,
     width,
   ]);

@@ -1,4 +1,4 @@
-import { CircleDotDashed } from "lucide-react";
+import { CircleDotDashed, CircleHelp } from "lucide-react";
 import { LoginButton } from "../auth/LoginButton";
 import { useAuthStore } from "../../store/authStore";
 import { useTreeStore } from "../../store/treeStore";
@@ -26,6 +26,9 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
       </div>
       <div className="topbar-actions">
         <span className="save-state">{isSaving ? "Saving..." : mode === "authenticated" ? "Synced" : ""}</span>
+        <a className="icon-button help-button" href="#faq" title="Help and shortcuts" aria-label="Help and shortcuts">
+          <CircleHelp size={17} />
+        </a>
         <LoginButton />
       </div>
     </header>
