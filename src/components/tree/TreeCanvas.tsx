@@ -28,6 +28,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
   const openContextMenu = useTreeStore((state) => state.openContextMenu);
   const startAddingChildNode = useTreeStore((state) => state.startAddingChildNode);
   const startEditingNode = useTreeStore((state) => state.startEditingNode);
+  const viewNodeAsRoot = useTreeStore((state) => state.viewNodeAsRoot);
   const deleteNode = useTreeStore((state) => state.deleteNode);
 
   useEffect(() => {
@@ -56,6 +57,24 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
       if (isEditingText) return;
 
+      if (event.key === "Meta" && !event.repeat) {
+        event.preventDefault();
+        viewNodeAsRoot(hoveredNodeId);
+        return;
+      }
+
+      if (event.key === "Control" && !event.repeat) {
+        event.preventDefault();
+        startEditingNode(hoveredNodeId);
+        return;
+      }
+
+      if (event.key === "Alt" && !event.repeat) {
+        event.preventDefault();
+        startAddingChildNode(hoveredNodeId);
+        return;
+      }
+
       if ((event.key === "Delete" || event.key === "Backspace") && !event.metaKey) {
         event.preventDefault();
         void deleteNode(hoveredNodeId);
@@ -65,7 +84,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteNode, hoveredNodeId]);
+  }, [deleteNode, hoveredNodeId, startAddingChildNode, startEditingNode, viewNodeAsRoot]);
 
   useLayoutEffect(() => {
     const svgElement = svgRef.current;
@@ -170,13 +189,18 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
       lastSourceRef.current = d.data.id;
       setHoveredNodeId(d.data.id);
 
-      if (event.altKey) {
-        startAddingChildNode(d.data.id);
+      if (event.metaKey) {
+        viewNodeAsRoot(d.data.id);
         return;
       }
 
       if (event.ctrlKey) {
         startEditingNode(d.data.id);
+        return;
+      }
+
+      if (event.altKey) {
+        startAddingChildNode(d.data.id);
       }
     };
 
@@ -235,6 +259,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     tree.currentViewRootNodeId,
     tree.root,
     availableHeight,
+    viewNodeAsRoot,
     viewRoot,
     width,
   ]);
