@@ -177,14 +177,14 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const nodeUpdate = node.merge(nodeEnter);
     updateNodeVisuals(nodeUpdate, collapsedIds);
     nodeUpdate.classed("is-hovered", (d) => d.data.id === hoveredNodeId);
-    nodeUpdate.select<SVGTextElement>("text").on("mouseenter", (event: MouseEvent, d) => {
+    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseenter", (event: MouseEvent, d) => {
       lastSourceRef.current = d.data.id;
       setHoveredNodeId(d.data.id);
       if (event.metaKey) {
         viewNodeAsRoot(d.data.id);
       }
     });
-    nodeUpdate.select<SVGTextElement>("text").on("mouseleave", (_event: MouseEvent, d) => {
+    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseleave", (_event: MouseEvent, d) => {
       setHoveredNodeId((current) => (current === d.data.id ? null : current));
     });
 

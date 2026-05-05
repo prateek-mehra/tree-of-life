@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import type { HierarchyPointNode, Selection } from "d3";
 import type { TreeNode } from "../../types/tree";
+import { renderNodeNameHtml } from "../../utils/latex";
 
 export type D3TreeNode = HierarchyPointNode<TreeNode> & {
   id: string;
@@ -19,15 +20,13 @@ export function appendNodeVisuals(
     .attr("stroke-width", 10);
 
   nodeEnter
-    .append("text")
-    .attr("dy", "0.31em")
-    .attr("x", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? -6 : 6))
-    .attr("text-anchor", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? "end" : "start"))
-    .text((d) => d.data.name)
-    .attr("stroke-linejoin", "round")
-    .attr("stroke-width", 3)
-    .attr("stroke", "white")
-    .attr("paint-order", "stroke");
+    .append("foreignObject")
+    .attr("class", "node-label")
+    .attr("width", 220)
+    .attr("height", 54)
+    .append("xhtml:div")
+    .attr("class", "node-label-content")
+    .html((d) => renderNodeNameHtml(d.data.name));
 }
 
 export function updateNodeVisuals(
@@ -39,10 +38,13 @@ export function updateNodeVisuals(
     .attr("fill", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? "#555" : "#999"));
 
   node
-    .select("text")
-    .attr("x", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? -6 : 6))
-    .attr("text-anchor", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? "end" : "start"))
-    .text((d) => d.data.name);
+    .select<SVGForeignObjectElement>("foreignObject.node-label")
+    .attr("x", (d) => (d.data.children?.length || collapsedNodeIds.has(d.data.id) ? -226 : 6))
+    .attr("y", -27)
+    .select<HTMLDivElement>("div.node-label-content")
+    .classed("is-left-aligned", (d) => !(d.data.children?.length || collapsedNodeIds.has(d.data.id)))
+    .classed("is-right-aligned", (d) => Boolean(d.data.children?.length || collapsedNodeIds.has(d.data.id)))
+    .html((d) => renderNodeNameHtml(d.data.name));
 }
 
 export const diagonal = d3

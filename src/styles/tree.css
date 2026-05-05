@@ -14,12 +14,51 @@
   cursor: pointer;
 }
 
-.tree-nodes text {
-  font: 10px sans-serif;
+.node-label {
+  overflow: visible;
 }
 
-.tree-nodes g.is-hovered text {
+.node-label-content {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  color: #2f2d2a;
+  font: 10px sans-serif;
+  overflow: visible;
+  pointer-events: auto;
+  text-shadow:
+    -2px -2px 0 #fff,
+    2px -2px 0 #fff,
+    -2px 2px 0 #fff,
+    2px 2px 0 #fff,
+    0 0 5px #fff;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.node-label-content.is-left-aligned {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.node-label-content.is-right-aligned {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.node-name-math {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 1px;
+}
+
+.node-name-math math {
+  font-size: 1.18em;
+}
+
+.tree-nodes g.is-hovered .node-label-content {
   fill: #176b5a;
+  color: #176b5a;
   font-weight: 700;
 }
 
