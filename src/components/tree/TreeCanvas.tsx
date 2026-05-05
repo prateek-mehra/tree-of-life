@@ -22,6 +22,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
   const positionsRef = useRef(new Map<string, StoredPosition>());
   const lastSourceRef = useRef<string>(tree.currentViewRootNodeId);
   const [width, setWidth] = useState(928);
+  const [availableHeight, setAvailableHeight] = useState(640);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const toggleNodeCollapsed = useTreeStore((state) => state.toggleNodeCollapsed);
   const openContextMenu = useTreeStore((state) => state.openContextMenu);
@@ -35,6 +36,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
 
     const observer = new ResizeObserver(([entry]) => {
       setWidth(Math.max(360, Math.floor(entry.contentRect.width)));
+      setAvailableHeight(Math.max(420, Math.floor(entry.contentRect.height)));
     });
     observer.observe(element);
     return () => observer.disconnect();
@@ -83,15 +85,15 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const marginTop = 10;
     const marginRight = 10;
     const marginBottom = 10;
-    const marginLeft = 40;
-    const dx = 10;
+    const marginLeft = 180;
+    const nodeCount = countNodes(viewRoot);
+    const dx = Math.max(24, Math.min(44, (availableHeight - marginTop - marginBottom) / Math.max(1, nodeCount - 1)));
     const fullRoot = d3.hierarchy(tree.root);
     const dy = (width - marginRight - marginLeft) / Math.max(1, 1 + fullRoot.height);
     const layout = d3.tree<typeof viewRoot>().nodeSize([dx, dy]);
     const root = d3.hierarchy(viewRoot) as D3TreeNode;
     const sourceId = lastSourceRef.current;
     const sourcePosition = positionsRef.current.get(sourceId) ?? { x: 0, y: 0 };
-    const nodeCount = countNodes(viewRoot);
     const duration = nodeCount > 500 ? 0 : nodeCount > 250 ? 120 : 250;
 
     root.x0 = sourcePosition.x;
@@ -110,7 +112,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
       if (d3Node.x > right.x) right = d3Node;
     });
 
-    const height = Math.max(220, right.x - left.x + marginTop + marginBottom);
+    const height = Math.max(availableHeight, right.x - left.x + marginTop + marginBottom);
     const svg = d3.select(svgElement);
     svg
       .attr("width", width)
@@ -232,6 +234,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     tree.collapsedNodeIds,
     tree.currentViewRootNodeId,
     tree.root,
+    availableHeight,
     viewNodeAsRoot,
     viewRoot,
     width,

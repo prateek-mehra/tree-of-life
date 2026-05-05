@@ -30,6 +30,7 @@ type TreeState = {
   updateNodeName(nodeId: string, name: string): Promise<void>;
   addChildNode(parentId: string, name?: string): Promise<void>;
   deleteNode(nodeId: string): Promise<void>;
+  deleteTree(treeId: string): Promise<void>;
   toggleNodeCollapsed(nodeId: string): Promise<void>;
   setFavorite(treeId: string, value: boolean): Promise<void>;
   saveNodeAsFavoriteTree(nodeId: string): Promise<void>;
@@ -216,6 +217,29 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     const root = deleteLeafNode(tree.root, nodeId);
     const collapsedNodeIds = tree.collapsedNodeIds.filter((id) => id !== nodeId);
     await persistActiveTree(tree, { root, collapsedNodeIds }, set, get);
+  },
+
+  async deleteTree(treeId) {
+    const tree = get().trees.find((item) => item.id === treeId);
+    if (!tree) return;
+
+    set({ isSaving: true, error: null });
+    try {
+      await repository.deleteTree(treeId);
+      const remainingTrees = get().trees.filter((item) => item.id !== treeId);
+      const nextActiveTree = get().activeTreeId === treeId ? (remainingTrees[0] ?? null) : get().activeTree;
+      set({
+        trees: remainingTrees,
+        activeTree: nextActiveTree,
+        activeTreeId: nextActiveTree?.id ?? null,
+        isSaving: false,
+        contextMenu: null,
+        editingNodeId: null,
+        addingChildToNodeId: null,
+      });
+    } catch (error) {
+      set({ isSaving: false, error: error instanceof Error ? error.message : "Unable to delete tree." });
+    }
   },
 
   async toggleNodeCollapsed(nodeId) {

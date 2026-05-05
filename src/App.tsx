@@ -6,16 +6,29 @@ import { AddChildDialog } from "./components/tree/AddChildDialog";
 import { EditNodeDialog } from "./components/tree/EditNodeDialog";
 import { TreeToolbar } from "./components/tree/TreeToolbar";
 import { useTreeStore } from "./store/treeStore";
+import { useAuthStore } from "./store/authStore";
+import { LoginPage } from "./components/auth/LoginPage";
 
 export function App() {
+  const isAuthReady = useAuthStore((state) => state.isAuthReady);
+  const hasEnteredApp = useAuthStore((state) => state.hasEnteredApp);
   const activeTree = useTreeStore((state) => state.activeTree);
   const loadTrees = useTreeStore((state) => state.loadTrees);
   const isLoading = useTreeStore((state) => state.isLoading);
   const error = useTreeStore((state) => state.error);
 
   useEffect(() => {
+    if (!hasEnteredApp) return;
     void loadTrees();
-  }, [loadTrees]);
+  }, [hasEnteredApp, loadTrees]);
+
+  if (!isAuthReady) {
+    return <div className="app-loading">Preparing Tree of Life...</div>;
+  }
+
+  if (!hasEnteredApp) {
+    return <LoginPage />;
+  }
 
   return (
     <AppShell>
