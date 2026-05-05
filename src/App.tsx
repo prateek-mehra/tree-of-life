@@ -38,7 +38,7 @@ export function App() {
         {isLoading ? (
           <div className="empty-state">Loading your trees...</div>
         ) : activeTree ? (
-          <TreeCanvas tree={activeTree} />
+          <TreeCanvas key={activeTree.id} tree={activeTree} />
         ) : (
           <div className="empty-state">Create a tree to begin.</div>
         )}

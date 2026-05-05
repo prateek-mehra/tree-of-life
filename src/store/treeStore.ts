@@ -4,7 +4,15 @@ import type { NodeActionPosition, TreeDocument, TreeNode } from "../types/tree";
 import { FirestoreTreeRepository } from "../services/firestoreTreeRepository";
 import { GuestTreeRepository } from "../services/guestTreeRepository";
 import type { TreeRepository } from "../services/treeRepository";
-import { addChildNode, cloneTreeNode, deleteLeafNode, findNode, updateNodeName as renameNode } from "../utils/treeTraversal";
+import {
+  addChildNode,
+  cloneTreeNode,
+  cloneTreeNodeWithFreshIds,
+  deleteLeafNode,
+  findNode,
+  replaceNode,
+  updateNodeName as renameNode,
+} from "../utils/treeTraversal";
 
 const guestRepository = new GuestTreeRepository();
 let repository: TreeRepository = guestRepository;
@@ -49,8 +57,83 @@ function updateTreeInList(trees: TreeDocument[], nextTree: TreeDocument) {
   return next.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 }
 
+function updateTreesInList(trees: TreeDocument[], nextTrees: TreeDocument[]) {
+  const replacements = new Map(nextTrees.map((tree) => [tree.id, tree]));
+  const next = trees.map((tree) => replacements.get(tree.id) ?? tree);
+  return next.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+}
+
 function firstNodeId(root: TreeNode, preferredId: string) {
   return findNode(root, preferredId)?.id ?? root.id;
+}
+
+function openAtOriginalRoot(tree: TreeDocument) {
+  return { ...tree, currentViewRootNodeId: firstNodeId(tree.root, tree.originalRootNodeId) };
+}
+
+async function repairStoredViewRoot(tree: TreeDocument) {
+  const nextTree = openAtOriginalRoot(tree);
+  if (nextTree.currentViewRootNodeId === tree.currentViewRootNodeId) {
+    return nextTree;
+  }
+
+  return repository.updateTree(tree.id, {
+    currentViewRootNodeId: nextTree.currentViewRootNodeId,
+  });
+}
+
+function validCollapsedNodeIds(root: TreeNode, collapsedNodeIds: string[]) {
+  return collapsedNodeIds.filter((id) => findNode(root, id));
+}
+
+async function syncLinkedTreeContent(saved: TreeDocument, trees: TreeDocument[]) {
+  const syncedTrees: TreeDocument[] = [saved];
+
+  for (const tree of trees) {
+    if (tree.id === saved.id) continue;
+
+    if (findNode(tree.root, saved.root.id)) {
+      const root = replaceNode(tree.root, saved.root.id, saved.root);
+      syncedTrees.push(
+        await repository.updateTree(tree.id, {
+          root,
+          collapsedNodeIds: validCollapsedNodeIds(root, tree.collapsedNodeIds),
+          currentViewRootNodeId: firstNodeId(root, tree.currentViewRootNodeId),
+        })
+      );
+      continue;
+    }
+
+    const linkedSubtree = findNode(saved.root, tree.root.id);
+    if (linkedSubtree) {
+      const root = cloneTreeNode(linkedSubtree);
+      syncedTrees.push(
+        await repository.updateTree(tree.id, {
+          name: root.name,
+          root,
+          collapsedNodeIds: validCollapsedNodeIds(root, tree.collapsedNodeIds),
+          originalRootNodeId: root.id,
+          currentViewRootNodeId: root.id,
+        })
+      );
+    }
+  }
+
+  return syncedTrees;
+}
+
+async function reconcileStoredLinkedContent(trees: TreeDocument[]) {
+  let nextTrees = trees;
+  const newestToOldest = [...trees].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+
+  for (const tree of newestToOldest) {
+    const currentTree = nextTrees.find((item) => item.id === tree.id);
+    if (!currentTree) continue;
+    const syncedTrees = await syncLinkedTreeContent(currentTree, nextTrees);
+    nextTrees = updateTreesInList(nextTrees, syncedTrees);
+  }
+
+  return nextTrees;
 }
 
 async function persistActiveTree(
@@ -63,9 +146,14 @@ async function persistActiveTree(
   try {
     const saved = await repository.updateTree(tree.id, patch);
     const state = get();
+    const syncedTrees = patch.root ? await syncLinkedTreeContent(saved, state.trees) : [saved];
+    const nextTrees = updateTreesInList(state.trees, syncedTrees);
+    const nextActiveTree =
+      syncedTrees.find((item) => item.id === state.activeTreeId) ?? (state.activeTreeId === saved.id ? saved : state.activeTree);
+
     set({
-      activeTree: state.activeTreeId === saved.id ? saved : state.activeTree,
-      trees: updateTreeInList(state.trees, saved),
+      activeTree: nextActiveTree,
+      trees: nextTrees,
       isSaving: false,
     });
   } catch (error) {
@@ -96,7 +184,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   async loadTrees() {
     set({ isLoading: true, error: null });
     try {
-      const trees = await repository.listTrees();
+      const repairedTrees = await Promise.all((await repository.listTrees()).map(repairStoredViewRoot));
+      const trees = await reconcileStoredLinkedContent(repairedTrees);
       const activeTree = trees[0] ?? null;
       set({
         trees,
@@ -133,21 +222,23 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set({ isSaving: true, error: null });
     try {
       const importedTrees: TreeDocument[] = [];
+      const idMap = new Map<string, string>();
       for (const tree of treesToImport) {
-        const root = cloneTreeNode(tree.root);
+        const { root } = cloneTreeNodeWithFreshIds(tree.root, idMap);
         const importedTree = await repository.createTree({
           name: tree.name || tree.root.name,
           root,
           is_favorite: tree.is_favorite,
           ownerId: get().userId ?? undefined,
         });
-        const rootNodeId = firstNodeId(root, tree.originalRootNodeId);
-        const viewRootNodeId = firstNodeId(root, tree.currentViewRootNodeId);
-        const collapsedNodeIds = tree.collapsedNodeIds.filter((id) => findNode(root, id));
+        const rootNodeId = idMap.get(tree.originalRootNodeId) ?? root.id;
+        const collapsedNodeIds = tree.collapsedNodeIds
+          .map((id) => idMap.get(id))
+          .filter((id): id is string => Boolean(id));
         const savedTree = await repository.updateTree(importedTree.id, {
           collapsedNodeIds,
           originalRootNodeId: rootNodeId,
-          currentViewRootNodeId: viewRootNodeId,
+          currentViewRootNodeId: rootNodeId,
         });
         importedTrees.push(savedTree);
       }
@@ -168,7 +259,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const tree = await repository.getTree(id);
-      const nextTree = tree ? { ...tree, currentViewRootNodeId: tree.originalRootNodeId } : null;
+      const nextTree = tree ? await repairStoredViewRoot(tree) : null;
       set({
         activeTree: nextTree,
         activeTreeId: nextTree?.id ?? null,

@@ -35,6 +35,35 @@ export function cloneTreeNode(node: TreeNode): TreeNode {
   };
 }
 
+export function cloneTreeNodeWithFreshIds(node: TreeNode, idMap = new Map<string, string>()) {
+  function cloneWithFreshId(current: TreeNode): TreeNode {
+    const id = idMap.get(current.id) ?? createId("node");
+    idMap.set(current.id, id);
+
+    return {
+      ...current,
+      id,
+      children: current.children?.map(cloneWithFreshId),
+    };
+  }
+
+  return {
+    root: cloneWithFreshId(node),
+    idMap,
+  };
+}
+
+export function replaceNode(root: TreeNode, nodeId: string, replacement: TreeNode): TreeNode {
+  if (root.id === nodeId) {
+    return cloneTreeNode(replacement);
+  }
+
+  return {
+    ...root,
+    children: root.children?.map((child) => replaceNode(child, nodeId, replacement)),
+  };
+}
+
 export function updateNodeName(root: TreeNode, nodeId: string, name: string): TreeNode {
   if (root.id === nodeId) {
     return { ...root, name };
