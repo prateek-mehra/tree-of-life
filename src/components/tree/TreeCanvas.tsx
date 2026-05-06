@@ -16,6 +16,9 @@ type StoredPosition = {
   y: number;
 };
 
+const HORIZONTAL_NODE_BUFFER = 12;
+const LABEL_HALF_HEIGHT = 27;
+
 export function TreeCanvas({ tree }: TreeCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -90,7 +93,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
-    const marginTop = 10;
+    const marginTop = LABEL_HALF_HEIGHT;
     const marginRight = 10;
     const marginBottom = 10;
     const marginLeft = 180;
@@ -99,7 +102,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const fullRoot = d3.hierarchy(tree.root);
     const legacySidebarWidth = 280;
     const layoutWidth = Math.max(360, width - legacySidebarWidth);
-    const dy = (layoutWidth - marginRight - marginLeft) / Math.max(1, 1 + fullRoot.height);
+    const dy = (layoutWidth - marginRight - marginLeft) / Math.max(1, 1 + fullRoot.height) + HORIZONTAL_NODE_BUFFER;
     const contentWidth = Math.max(width, marginLeft + marginRight + 260 + fullRoot.height * dy);
     const layout = d3.tree<typeof viewRoot>().nodeSize([dx, dy]);
     const root = d3.hierarchy(viewRoot) as D3TreeNode;
