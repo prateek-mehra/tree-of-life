@@ -8,7 +8,9 @@ export function CreateTreeDialog() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    void createTree(name || "Tree of Life");
+    const cleanName = name.trim();
+    if (!cleanName) return;
+    void createTree(cleanName);
     setName("");
   };
 

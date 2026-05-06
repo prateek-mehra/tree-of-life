@@ -229,6 +229,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
           name: tree.name || tree.root.name,
           root,
           is_favorite: tree.is_favorite,
+          view_count: tree.view_count ?? 0,
           ownerId: get().userId ?? undefined,
         });
         const rootNodeId = idMap.get(tree.originalRootNodeId) ?? root.id;
@@ -259,10 +260,15 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const tree = await repository.getTree(id);
-      const nextTree = tree ? await repairStoredViewRoot(tree) : null;
+      const repairedTree = tree ? await repairStoredViewRoot(tree) : null;
+      const nextTree = repairedTree
+        ? await repository.updateTree(repairedTree.id, { view_count: (repairedTree.view_count ?? 0) + 1 })
+        : null;
+      const nextTrees = nextTree ? updateTreeInList(get().trees, nextTree) : get().trees;
       set({
         activeTree: nextTree,
         activeTreeId: nextTree?.id ?? null,
+        trees: nextTrees,
         isLoading: false,
         contextMenu: null,
         editingNodeId: null,

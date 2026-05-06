@@ -5,7 +5,6 @@ import { TreeCanvas } from "./components/tree/TreeCanvas";
 import { ContextMenu } from "./components/tree/ContextMenu";
 import { AddChildDialog } from "./components/tree/AddChildDialog";
 import { EditNodeDialog } from "./components/tree/EditNodeDialog";
-import { TreeToolbar } from "./components/tree/TreeToolbar";
 import { useTreeStore } from "./store/treeStore";
 import { useAuthStore } from "./store/authStore";
 import { LoginPage } from "./components/auth/LoginPage";
@@ -45,7 +44,6 @@ export function App() {
           <FaqPage />
         ) : activeTree ? (
           <>
-            <TreeToolbar />
             {error ? <div className="status-banner">{error}</div> : null}
             {isLoading ? (
               <div className="empty-state">Loading your trees...</div>

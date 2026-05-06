@@ -12,14 +12,16 @@ export interface TreeRepository {
 
 export function createTreeDocument(input: CreateTreeInput): TreeDocument {
   const now = new Date().toISOString();
-  const root = input.root ? cloneTreeNode(input.root) : createRootNode();
+  const name = input.name.trim() || "Untitled Tree";
+  const root = input.root ? cloneTreeNode(input.root) : createRootNode(name);
 
   return {
     id: createId("tree"),
-    name: input.name.trim() || "Untitled Tree",
+    name,
     created_at: now,
     updated_at: now,
     is_favorite: input.is_favorite ?? false,
+    view_count: input.view_count ?? 0,
     root,
     collapsedNodeIds: [],
     originalRootNodeId: root.id,

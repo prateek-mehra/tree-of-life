@@ -1,10 +1,10 @@
 import { createId } from "./ids";
 import type { TreeNode } from "../types/tree";
 
-export function createRootNode(): TreeNode {
+export function createRootNode(name = "Life"): TreeNode {
   return {
     id: createId("node"),
-    name: "Life",
+    name,
     children: [],
   };
 }

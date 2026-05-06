@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-
 const shortcuts = [
   ["Click a branch node", "Collapse or expand it."],
   ["Right-click a node", "Open node actions."],
@@ -7,7 +5,13 @@ const shortcuts = [
   ["Option + hover node name", "Add a child node."],
   ["Ctrl + hover node name", "Edit the node name."],
   ["Delete or Backspace while hovering", "Delete a leaf node."],
-  ["Ctrl + B", "Show or hide the tree panel."],
+  ["Escape", "Log out."],
+  ["Cmd + H", "Return to the full Tree of Life view."],
+  ["Cmd + F", "Show or hide favorite trees."],
+  ["Cmd + N", "Open the new tree dialog."],
+  ["Cmd + A", "Show or hide all trees."],
+  ["Cmd + E", "Export trees."],
+  ["Cmd + I", "Import trees."],
 ];
 
 const latexExamples = [
@@ -24,10 +28,6 @@ export function FaqPage() {
   return (
     <section className="faq-page" aria-labelledby="faq-title">
       <div className="faq-header">
-        <a className="icon-text-button faq-back" href="#" aria-label="Back to tree">
-          <ArrowLeft size={16} />
-          <span>Back to tree</span>
-        </a>
         <div>
           <p>Help</p>
           <h1 id="faq-title">Tree of Life FAQ</h1>

@@ -1,11 +1,14 @@
 import type { PropsWithChildren } from "react";
-import { useEffect, useState } from "react";
-import { Sidebar } from "./Sidebar";
+import { useEffect } from "react";
 import { TopBar } from "./TopBar";
 import { AppFooter } from "./AppFooter";
+import { signOut } from "../../services/firebase";
+import { useAuthStore } from "../../store/authStore";
+import { useTreeStore } from "../../store/treeStore";
 
 export function AppShell({ children }: PropsWithChildren) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const clearUser = useAuthStore((state) => state.clearUser);
+  const resetViewRoot = useTreeStore((state) => state.resetViewRoot);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -13,21 +16,28 @@ export function AppShell({ children }: PropsWithChildren) {
       const isEditingText =
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
       if (isEditingText) return;
-      if (event.ctrlKey && event.key.toLowerCase() === "b") {
+
+      if (event.key === "Escape") {
         event.preventDefault();
-        setIsSidebarOpen((value) => !value);
+        void signOut().finally(clearUser);
+        return;
+      }
+
+      if (event.metaKey && event.key.toLowerCase() === "h") {
+        event.preventDefault();
+        resetViewRoot();
+        window.location.hash = "";
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [clearUser, resetViewRoot]);
 
   return (
-    <div className={`app-shell ${isSidebarOpen ? "" : "sidebar-is-closed"}`}>
-      <TopBar isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen((value) => !value)} />
+    <div className="app-shell">
+      <TopBar />
       <div className="workspace">
-        <Sidebar isOpen={isSidebarOpen} />
         {children}
       </div>
       <AppFooter />

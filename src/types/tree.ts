@@ -10,6 +10,7 @@ export type TreeDocument = {
   created_at: string;
   updated_at: string;
   is_favorite: boolean;
+  view_count: number;
   root: TreeNode;
   collapsedNodeIds: string[];
   originalRootNodeId: string;
@@ -21,6 +22,7 @@ export type CreateTreeInput = {
   name: string;
   root?: TreeNode;
   is_favorite?: boolean;
+  view_count?: number;
   ownerId?: string;
 };
 

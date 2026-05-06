@@ -1,8 +1,10 @@
 .tree-canvas {
+  width: max-content;
   min-width: 100%;
   height: 100%;
   min-height: 100%;
   padding: 64px 28px 48px 0;
+  overflow: visible;
 }
 
 .tree-canvas svg {
@@ -60,20 +62,6 @@
   fill: #176b5a;
   color: #176b5a;
   font-weight: 700;
-}
-
-.tree-toolbar {
-  position: fixed;
-  top: 70px;
-  right: 18px;
-  z-index: 5;
-  display: flex;
-  justify-content: flex-end;
-  pointer-events: none;
-}
-
-.tree-toolbar button {
-  pointer-events: auto;
 }
 
 .context-scrim,

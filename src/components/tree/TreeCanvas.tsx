@@ -97,7 +97,10 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const nodeCount = countNodes(viewRoot);
     const dx = Math.max(24, Math.min(44, (availableHeight - marginTop - marginBottom) / Math.max(1, nodeCount - 1)));
     const fullRoot = d3.hierarchy(tree.root);
-    const dy = (width - marginRight - marginLeft) / Math.max(1, 1 + fullRoot.height);
+    const legacySidebarWidth = 280;
+    const layoutWidth = Math.max(360, width - legacySidebarWidth);
+    const dy = (layoutWidth - marginRight - marginLeft) / Math.max(1, 1 + fullRoot.height);
+    const contentWidth = Math.max(width, marginLeft + marginRight + 260 + fullRoot.height * dy);
     const layout = d3.tree<typeof viewRoot>().nodeSize([dx, dy]);
     const root = d3.hierarchy(viewRoot) as D3TreeNode;
     const sourceId = lastSourceRef.current;
@@ -123,10 +126,10 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const height = Math.max(availableHeight, right.x - left.x + marginTop + marginBottom);
     const svg = d3.select(svgElement);
     svg
-      .attr("width", width)
+      .attr("width", contentWidth)
       .attr("height", height)
-      .attr("viewBox", `${-marginLeft} ${left.x - marginTop} ${width} ${height}`)
-      .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select: none;");
+      .attr("viewBox", `${-marginLeft} ${left.x - marginTop} ${contentWidth} ${height}`)
+      .attr("style", "height: auto; font: 10px sans-serif; user-select: none;");
 
     let gLink = svg.select<SVGGElement>("g.tree-links");
     if (gLink.empty()) {

@@ -2,33 +2,30 @@ import { CircleDotDashed, CircleHelp } from "lucide-react";
 import { LoginButton } from "../auth/LoginButton";
 import { useAuthStore } from "../../store/authStore";
 import { useTreeStore } from "../../store/treeStore";
+import { HeaderTreeControls } from "./HeaderTreeControls";
 
-type TopBarProps = {
-  isSidebarOpen: boolean;
-  onToggleSidebar: () => void;
-};
-
-export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
+export function TopBar() {
   const mode = useAuthStore((state) => state.mode);
   const isSaving = useTreeStore((state) => state.isSaving);
+
+  function toggleHelp() {
+    window.location.hash = window.location.hash === "#faq" ? "" : "faq";
+  }
 
   return (
     <header className="topbar">
       <div className="brand">
-        <button
-          className="icon-button brand-toggle"
-          onClick={onToggleSidebar}
-          title={isSidebarOpen ? "Hide tree panel" : "Show tree panel"}
-        >
+        <span className="brand-mark">
           <CircleDotDashed size={18} />
-        </button>
+        </span>
         <span>Tree of Life</span>
       </div>
+      <HeaderTreeControls />
       <div className="topbar-actions">
         <span className="save-state">{isSaving ? "Saving..." : mode === "authenticated" ? "Synced" : ""}</span>
-        <a className="icon-button help-button" href="#faq" title="Help and shortcuts" aria-label="Help and shortcuts">
+        <button className="icon-button help-button" onClick={toggleHelp} title="Help and shortcuts" aria-label="Help and shortcuts">
           <CircleHelp size={17} />
-        </a>
+        </button>
         <LoginButton />
       </div>
     </header>
