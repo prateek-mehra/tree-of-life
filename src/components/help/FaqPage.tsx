@@ -10,7 +10,7 @@ const shortcuts = [
   ["Cmd + L", "Open the tree whose root node is Life."],
   ["Cmd + <", "Return to the full view of the current tree."],
   ["Cmd + F", "Show or hide favorite trees."],
-  ["Cmd + N", "Open the new tree dialog."],
+  ["Option + N", "Open the new tree dialog."],
   ["Cmd + A", "Show or hide all trees."],
   ["Cmd + E", "Export trees."],
   ["Cmd + I", "Import trees."],

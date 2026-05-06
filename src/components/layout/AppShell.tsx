@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
 import { TopBar } from "./TopBar";
 import { AppFooter } from "./AppFooter";
+import { HeaderTreeControls } from "./HeaderTreeControls";
 import { signOut } from "../../services/firebase";
 import { useAuthStore } from "../../store/authStore";
 import { useTreeStore } from "../../store/treeStore";
@@ -61,6 +62,9 @@ export function AppShell({ children }: PropsWithChildren) {
       <TopBar />
       <div className="workspace">
         {children}
+      </div>
+      <div className="side-tree-controls">
+        <HeaderTreeControls />
       </div>
       <AppFooter />
     </div>

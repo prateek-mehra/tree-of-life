@@ -2,7 +2,6 @@ import { CircleDotDashed, CircleHelp } from "lucide-react";
 import { LoginButton } from "../auth/LoginButton";
 import { useAuthStore } from "../../store/authStore";
 import { useTreeStore } from "../../store/treeStore";
-import { HeaderTreeControls } from "./HeaderTreeControls";
 
 export function TopBar() {
   const mode = useAuthStore((state) => state.mode);
@@ -20,7 +19,6 @@ export function TopBar() {
         </span>
         <span>Tree of Life</span>
       </div>
-      <HeaderTreeControls />
       <div className="topbar-actions">
         <span className="save-state">{isSaving ? "Saving..." : mode === "authenticated" ? "Synced" : ""}</span>
         <button className="icon-button help-button" onClick={toggleHelp} title="Help and shortcuts" aria-label="Help and shortcuts">

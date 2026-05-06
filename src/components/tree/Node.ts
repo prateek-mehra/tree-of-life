@@ -41,7 +41,7 @@ export function appendNodeVisuals(
     .attr("height", 54)
     .append("xhtml:div")
     .attr("class", "node-label-content")
-    .html((d) => renderNodeNameHtml(d.data.name));
+    .html((d) => `<span class="node-label-hit">${renderNodeNameHtml(d.data.name)}</span>`);
 }
 
 export function updateNodeVisuals(
@@ -58,7 +58,7 @@ export function updateNodeVisuals(
     .classed("is-left-aligned", (d) => !(d.data.children?.length || collapsedNodeIds.has(d.data.id)))
     .classed("is-right-aligned", (d) => Boolean(d.data.children?.length || collapsedNodeIds.has(d.data.id)))
     .style("color", (d) => getNodeColor(d, collapsedNodeIds))
-    .html((d) => renderNodeNameHtml(d.data.name));
+    .html((d) => `<span class="node-label-hit">${renderNodeNameHtml(d.data.name)}</span>`);
 }
 
 export const diagonal = d3

@@ -144,7 +144,7 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
 
     let gNode = svg.select<SVGGElement>("g.tree-nodes");
     if (gNode.empty()) {
-      gNode = svg.append("g").attr("class", "tree-nodes").attr("cursor", "pointer").attr("pointer-events", "all");
+      gNode = svg.append("g").attr("class", "tree-nodes");
     }
 
     svg.transition().duration(duration);
@@ -207,9 +207,9 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
       }
     };
 
-    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseenter", handleModifierHover);
-    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mousemove", handleModifierHover);
-    nodeUpdate.select<SVGForeignObjectElement>("foreignObject.node-label").on("mouseleave", (_event: MouseEvent, d) => {
+    nodeUpdate.select<HTMLSpanElement>(".node-label-hit").on("mouseenter", handleModifierHover);
+    nodeUpdate.select<HTMLSpanElement>(".node-label-hit").on("mousemove", handleModifierHover);
+    nodeUpdate.select<HTMLSpanElement>(".node-label-hit").on("mouseleave", (_event: MouseEvent, d) => {
       setHoveredNodeId((current) => (current === d.data.id ? null : current));
     });
 

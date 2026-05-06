@@ -72,16 +72,20 @@ export function HeaderTreeControls() {
       const target = event.target as HTMLElement | null;
       const isEditingText =
         target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
-      if (isEditingText || !event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      if (isEditingText || event.ctrlKey || event.shiftKey) return;
+
+      if (event.altKey && !event.metaKey && event.code === "KeyN") {
+        event.preventDefault();
+        setIsCreateOpen(true);
+        return;
+      }
+
+      if (!event.metaKey || event.altKey) return;
 
       switch (event.key.toLowerCase()) {
         case "f":
           event.preventDefault();
           setPopupMode((mode) => (mode === "favorites" ? null : "favorites"));
-          break;
-        case "n":
-          event.preventDefault();
-          setIsCreateOpen(true);
           break;
         case "a":
           event.preventDefault();

@@ -40,12 +40,11 @@ button {
 }
 
 .app-shell {
-  display: grid;
-  grid-template-rows: 56px 1fr;
+  position: relative;
+  display: block;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  padding-bottom: 44px;
   background: #fff;
 }
 
@@ -58,11 +57,18 @@ button {
 }
 
 .topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 15;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  height: 56px;
   padding: 0 16px;
+  background: transparent;
+  pointer-events: none;
 }
 
 .brand,
@@ -76,6 +82,7 @@ button {
 .brand {
   font-weight: 650;
   min-width: 0;
+  pointer-events: auto;
 }
 
 .brand-mark {
@@ -90,15 +97,23 @@ button {
   justify-self: end;
   gap: 12px;
   min-width: 0;
+  pointer-events: auto;
+}
+
+.side-tree-controls {
+  position: fixed;
+  top: 50%;
+  left: 14px;
+  z-index: 16;
+  transform: translateY(-50%);
 }
 
 .header-tree-controls {
   position: relative;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-self: center;
   gap: 8px;
-  min-width: max-content;
 }
 
 .header-tree-controls > input {
@@ -164,7 +179,7 @@ button {
 
 @media (max-width: 680px) {
   .topbar {
-    grid-template-columns: 34px auto minmax(70px, 1fr);
+    grid-template-columns: 34px minmax(70px, 1fr);
     gap: 6px;
     padding: 0 10px;
   }
@@ -177,6 +192,10 @@ button {
 
   .header-tree-controls {
     gap: 5px;
+  }
+
+  .side-tree-controls {
+    left: 8px;
   }
 
   .topbar-icon {
@@ -215,7 +234,7 @@ button {
 .app-footer {
   position: fixed;
   right: 16px;
-  bottom: 10px;
+  bottom: 0;
   z-index: 15;
   display: inline-flex;
   gap: 8px;
@@ -472,8 +491,8 @@ input {
 
 .tree-popup {
   position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
+  top: 50%;
+  left: calc(100% + 10px);
   z-index: 25;
   width: min(320px, calc(100vw - 32px));
   max-height: min(420px, calc(100vh - 96px));
@@ -483,20 +502,20 @@ input {
   padding: 8px;
   background: #fff;
   box-shadow: 0 18px 50px rgb(0 0 0 / 14%);
-  transform: translateX(-50%);
+  transform: translateY(-50%);
 }
 
 .tree-popup::before {
   position: absolute;
-  top: -6px;
-  left: 50%;
+  top: 50%;
+  left: -6px;
   width: 10px;
   height: 10px;
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   border-left: 1px solid var(--border);
   background: #fff;
   content: "";
-  transform: translateX(-50%) rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .tree-popup-list {
@@ -512,11 +531,11 @@ input {
 
 .header-transfer-error {
   position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
+  top: 50%;
+  left: calc(100% + 10px);
   z-index: 26;
   width: min(320px, calc(100vw - 32px));
-  transform: translateX(-50%);
+  transform: translateY(-50%);
 }
 
 .favorite-toggle {
