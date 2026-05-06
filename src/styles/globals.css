@@ -201,10 +201,15 @@ button {
   position: relative;
   width: 100%;
   min-width: 0;
-  height: 100%;
+  height: calc(100% + 16px);
   min-height: 0;
   overflow: auto;
   background: #fff;
+}
+
+.canvas-region::-webkit-scrollbar:horizontal {
+  display: none;
+  height: 0;
 }
 
 .app-footer {
