@@ -47,6 +47,23 @@ export function createTreeExport(trees: TreeDocument[]): TreeExportFile {
   };
 }
 
+export function getTopLevelTrees(trees: TreeDocument[]) {
+  const latestByRootId = new Map<string, TreeDocument>();
+
+  for (const tree of trees) {
+    const existing = latestByRootId.get(tree.root.id);
+    if (!existing || tree.updated_at.localeCompare(existing.updated_at) > 0) {
+      latestByRootId.set(tree.root.id, tree);
+    }
+  }
+
+  const uniqueTrees = Array.from(latestByRootId.values());
+
+  return uniqueTrees.filter(
+    (tree) => !uniqueTrees.some((otherTree) => otherTree.id !== tree.id && containsNode(otherTree.root, tree.root.id, true))
+  );
+}
+
 export function parseTreeExport(contents: string): TreeDocument[] {
   let parsed: unknown;
   try {
@@ -64,4 +81,9 @@ export function parseTreeExport(contents: string): TreeDocument[] {
   }
 
   return parsed.trees;
+}
+
+function containsNode(root: TreeNode, nodeId: string, skipRoot = false): boolean {
+  if (!skipRoot && root.id === nodeId) return true;
+  return (root.children ?? []).some((child) => child.id === nodeId || containsNode(child, nodeId));
 }

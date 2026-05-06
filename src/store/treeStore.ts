@@ -4,6 +4,7 @@ import type { NodeActionPosition, TreeDocument, TreeNode } from "../types/tree";
 import { FirestoreTreeRepository } from "../services/firestoreTreeRepository";
 import { GuestTreeRepository } from "../services/guestTreeRepository";
 import type { TreeRepository } from "../services/treeRepository";
+import { autoExportChangedSessionTrees } from "../utils/autoTreeExport";
 import {
   addChildNode,
   cloneTreeNode,
@@ -29,9 +30,11 @@ type TreeState = {
   contextMenu: NodeActionPosition | null;
   isLoading: boolean;
   isSaving: boolean;
+  hasSessionChanges: boolean;
   error: string | null;
   configurePersistence(mode: AuthMode, userId: string | null): Promise<void>;
   loadTrees(): Promise<void>;
+  exportChangedSessionTrees(): Promise<void>;
   createTree(name: string): Promise<void>;
   importTrees(trees: TreeDocument[]): Promise<void>;
   selectTree(id: string): Promise<void>;
@@ -155,6 +158,7 @@ async function persistActiveTree(
       activeTree: nextActiveTree,
       trees: nextTrees,
       isSaving: false,
+      hasSessionChanges: true,
     });
   } catch (error) {
     set({ isSaving: false, error: error instanceof Error ? error.message : "Unable to save tree." });
@@ -173,11 +177,12 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   contextMenu: null,
   isLoading: false,
   isSaving: false,
+  hasSessionChanges: false,
   error: null,
 
   async configurePersistence(mode, userId) {
     repository = mode === "authenticated" && userId ? new FirestoreTreeRepository(userId) : guestRepository;
-    set({ mode, userId, activeTree: null, activeTreeId: null, trees: [] });
+    set({ mode, userId, activeTree: null, activeTreeId: null, trees: [], hasSessionChanges: false });
     await get().loadTrees();
   },
 
@@ -198,6 +203,14 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     }
   },
 
+  async exportChangedSessionTrees() {
+    const { hasSessionChanges, trees } = get();
+    if (!hasSessionChanges) return;
+
+    await autoExportChangedSessionTrees(trees);
+    set({ hasSessionChanges: false });
+  },
+
   async createTree(name) {
     set({ isSaving: true, error: null });
     try {
@@ -207,6 +220,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         activeTree: tree,
         activeTreeId: tree.id,
         isSaving: false,
+        hasSessionChanges: true,
       });
     } catch (error) {
       set({ isSaving: false, error: error instanceof Error ? error.message : "Unable to create tree." });
@@ -250,6 +264,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         activeTree: importedTrees[0] ?? get().activeTree,
         activeTreeId: importedTrees[0]?.id ?? get().activeTreeId,
         isSaving: false,
+        hasSessionChanges: true,
       });
     } catch (error) {
       set({ isSaving: false, error: error instanceof Error ? error.message : "Unable to import trees." });
@@ -330,6 +345,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         activeTree: nextActiveTree,
         activeTreeId: nextActiveTree?.id ?? null,
         isSaving: false,
+        hasSessionChanges: true,
         contextMenu: null,
         editingNodeId: null,
         addingChildToNodeId: null,
@@ -386,6 +402,7 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         activeTree: favoriteTree,
         activeTreeId: favoriteTree.id,
         isSaving: false,
+        hasSessionChanges: true,
         contextMenu: null,
       });
     } catch (error) {

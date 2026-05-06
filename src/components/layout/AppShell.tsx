@@ -3,12 +3,10 @@ import { useEffect } from "react";
 import { TopBar } from "./TopBar";
 import { AppFooter } from "./AppFooter";
 import { HeaderTreeControls } from "./HeaderTreeControls";
-import { signOut } from "../../services/firebase";
-import { useAuthStore } from "../../store/authStore";
+import { signOutWithAutoExport } from "../../services/logout";
 import { useTreeStore } from "../../store/treeStore";
 
 export function AppShell({ children }: PropsWithChildren) {
-  const clearUser = useAuthStore((state) => state.clearUser);
   const trees = useTreeStore((state) => state.trees);
   const selectTree = useTreeStore((state) => state.selectTree);
   const resetViewRoot = useTreeStore((state) => state.resetViewRoot);
@@ -30,7 +28,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
       if (event.key === "Escape") {
         event.preventDefault();
-        void signOut().finally(clearUser);
+        void signOutWithAutoExport();
         return;
       }
 
@@ -55,7 +53,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [clearUser, resetViewRoot, selectTree, trees]);
+  }, [resetViewRoot, selectTree, trees]);
 
   return (
     <div className="app-shell">

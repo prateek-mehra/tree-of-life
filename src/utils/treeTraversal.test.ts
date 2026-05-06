@@ -10,6 +10,8 @@ import {
   updateNodeName,
 } from "./treeTraversal";
 import type { TreeNode } from "../types/tree";
+import { getTopLevelTrees } from "./treeTransfer";
+import type { TreeDocument } from "../types/tree";
 
 const tree: TreeNode = {
   id: "life",
@@ -90,5 +92,37 @@ describe("treeTraversal", () => {
     expect(findNode(next, "sleep")).toBeNull();
     expect(findNode(next, "nutrition")?.name).toBe("Nutrition");
     expect(findNode(tree, "sleep")?.name).toBe("Sleep");
+  });
+});
+
+describe("treeTransfer", () => {
+  function treeDocument(id: string, root: TreeNode, updatedAt = "2026-01-01T00:00:00.000Z"): TreeDocument {
+    return {
+      id,
+      name: root.name,
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: updatedAt,
+      is_favorite: false,
+      view_count: 0,
+      root,
+      collapsedNodeIds: [],
+      originalRootNodeId: root.id,
+      currentViewRootNodeId: root.id,
+    };
+  }
+
+  it("exports only trees that are not subtrees of another tree", () => {
+    const life = treeDocument("life-tree", tree);
+    const body = treeDocument("body-tree", tree.children![0]);
+    const standalone = treeDocument("career-tree", { id: "career", name: "Career", children: [] });
+
+    expect(getTopLevelTrees([body, standalone, life]).map((item) => item.id)).toEqual(["career-tree", "life-tree"]);
+  });
+
+  it("keeps the newest document when duplicate tree roots exist", () => {
+    const older = treeDocument("older-life", tree, "2026-01-01T00:00:00.000Z");
+    const newer = treeDocument("newer-life", tree, "2026-01-02T00:00:00.000Z");
+
+    expect(getTopLevelTrees([older, newer])).toEqual([newer]);
   });
 });
