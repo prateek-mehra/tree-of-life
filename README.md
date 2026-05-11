@@ -67,13 +67,17 @@ Ratio $\frac{a+b}{c}$
 Distance $\sqrt{x^2 + y^2}$
 Greek $\alpha + \beta \le \gamma$
 Limit $\lim_{n \to \infty} a_n$
+Prediction $\hat y_i$
+Gradient $g=\frac{1}{N}\sum_{i=1}^{N}\nabla_{\theta}L_i(\theta),\quad \theta_{t+1}=\theta_t-\eta g$
 ```
 
 Supported fundamentals include:
 
 - Superscripts: `$x^2$`, `$e^{i\pi}$`
 - Subscripts: `$x_1$`, `$a_{n+1}$`
+- Accents: `$\hat y_i$`
 - Fractions: `$\frac{numerator}{denominator}$`
 - Square roots: `$\sqrt{x+y}$`
 - Greek letters: `\alpha`, `\beta`, `\gamma`, `\Delta`, `\Omega`
+- Spacing: `\quad`
 - Common operators: `\times`, `\cdot`, `\pm`, `\le`, `\ge`, `\neq`, `\approx`, `\to`, `\infty`, `\sum`, `\int`

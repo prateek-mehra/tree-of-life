@@ -22,8 +22,9 @@ const latexExamples = [
   ["Parentheses form", "\\(\\alpha + \\beta\\)"],
   ["Square-root", "$\\sqrt{x}$"],
   ["Fraction", "$\\frac{n}{2}$"],
+  ["Hat accent", "$\\hat y_i$"],
   ["Greek letters", "$\\theta, \\lambda, \\Omega$"],
-  ["Operators", "$\\le, \\ge, \\neq, \\to, \\infty$"],
+  ["Operators", "$\\le, \\ge, \\neq, \\to, \\infty, \\quad$"],
 ];
 
 export function FaqPage() {
@@ -62,7 +63,7 @@ export function FaqPage() {
         <h2>LaTeX In Names</h2>
         <ul>
           <li>Wrap math in <code>$...$</code>, <code>$$...$$</code>, <code>\(...\)</code>, or <code>\[...\]</code>.</li>
-          <li>Supported syntax includes superscripts, subscripts, fractions, square roots, Greek letters, and common operators.</li>
+          <li>Supported syntax includes superscripts, subscripts, hat accents, fractions, square roots, Greek letters, spacing, and common operators.</li>
           <li>Plain text can sit beside math in the same node name.</li>
           <li>Escape a dollar sign as <code>\$</code> when you want a literal dollar sign.</li>
         </ul>

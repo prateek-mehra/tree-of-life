@@ -190,14 +190,15 @@ class LatexParser {
     if (!char) return "";
 
     if (char === "{") {
-      this.index += 1;
-      const group = this.parseExpression("}");
-      if (this.input[this.index] === "}") this.index += 1;
-      return group;
+      return this.parseBracedGroup(true);
     }
 
     if (char === "\\") {
       return this.parseCommand();
+    }
+
+    if (char === "(" || char === "[") {
+      return this.parseDelimitedGroup(char);
     }
 
     this.index += 1;
@@ -231,6 +232,14 @@ class LatexParser {
       return `<msqrt>${this.parseRequiredArgument()}</msqrt>`;
     }
 
+    if (command === "hat") {
+      return `<mover>${this.parseRequiredArgument()}<mo>^</mo></mover>`;
+    }
+
+    if (command === "quad") {
+      return "<mspace width=\"1em\" />";
+    }
+
     if (command === "left" || command === "right") {
       return this.parseAtom();
     }
@@ -246,12 +255,32 @@ class LatexParser {
     return `<mi>${escapeHtml(command)}</mi>`;
   }
 
+  private parseDelimitedGroup(opener: string): string {
+    const closer = opener === "(" ? ")" : "]";
+    this.index += 1;
+    const group = this.parseExpression(closer);
+    if (this.input[this.index] === closer) this.index += 1;
+    return this.row([this.operator(opener), group, this.operator(closer)]);
+  }
+
   private parseRequiredArgument(): string {
     while (/\s/.test(this.input[this.index] ?? "")) {
       this.index += 1;
     }
 
+    if (this.input[this.index] === "{") {
+      return this.parseBracedGroup(false);
+    }
+
     return this.parseAtom();
+  }
+
+  private parseBracedGroup(renderEmptyBraces: boolean): string {
+    this.index += 1;
+    const group = this.parseExpression("}");
+    if (this.input[this.index] === "}") this.index += 1;
+    if (!group && renderEmptyBraces) return this.row([this.operator("{"), this.operator("}")]);
+    return group;
   }
 
   private parseScripts(base: string): string {
@@ -276,6 +305,7 @@ class LatexParser {
   }
 
   private row(nodes: string[]) {
+    if (nodes.length === 0) return "";
     if (nodes.length === 1) return nodes[0];
     return `<mrow>${nodes.join("")}</mrow>`;
   }
