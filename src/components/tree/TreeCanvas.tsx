@@ -18,6 +18,7 @@ type StoredPosition = {
 
 const HORIZONTAL_NODE_BUFFER = 12;
 const LABEL_HALF_HEIGHT = 27;
+const TOP_INTERACTION_GUTTER = 84;
 
 export function TreeCanvas({ tree }: TreeCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -93,12 +94,15 @@ export function TreeCanvas({ tree }: TreeCanvasProps) {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
-    const marginTop = LABEL_HALF_HEIGHT;
+    const marginTop = TOP_INTERACTION_GUTTER;
     const marginRight = 10;
     const marginBottom = 10;
     const marginLeft = 180;
     const nodeCount = countNodes(viewRoot);
-    const dx = Math.max(24, Math.min(44, (availableHeight - marginTop - marginBottom) / Math.max(1, nodeCount - 1)));
+    const dx = Math.max(
+      24,
+      Math.min(44, (availableHeight - LABEL_HALF_HEIGHT - marginBottom) / Math.max(1, nodeCount - 1))
+    );
     const fullRoot = d3.hierarchy(tree.root);
     const legacySidebarWidth = 280;
     const layoutWidth = Math.max(360, width - legacySidebarWidth);

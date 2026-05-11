@@ -288,8 +288,8 @@ class LatexParser {
 export function latexToMathML(value: string, display = false) {
   const parser = new LatexParser(value);
   const body = parser.parse();
-  const displayAttribute = display ? " display=\"block\"" : "";
-  return `<math xmlns=\"http://www.w3.org/1998/Math/MathML\"${displayAttribute}>${body}</math>`;
+  const displayAttribute = display ? ' display="block"' : "";
+  return `<math xmlns="http://www.w3.org/1998/Math/MathML"${displayAttribute}>${body}</math>`;
 }
 
 export function renderNodeNameHtml(value: string) {
@@ -297,7 +297,7 @@ export function renderNodeNameHtml(value: string) {
   return segments
     .map((segment) =>
       segment.kind === "math"
-        ? `<span class=\"node-name-math\">${latexToMathML(segment.value, segment.display)}</span>`
+        ? `<span class="node-name-math">${latexToMathML(segment.value, segment.display)}</span>`
         : `<span>${escapeHtml(segment.value).replace(/\\\$/g, "$")}</span>`
     )
     .join("");

@@ -1,5 +1,5 @@
 import { Download, Heart, Plus, Trash2, Trees, Upload } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTreeStore } from "../../store/treeStore";
 import { createTreeExport, parseTreeExport } from "../../utils/treeTransfer";
 import { FavoriteToggle } from "../trees/FavoriteToggle";
@@ -28,7 +28,7 @@ export function HeaderTreeControls() {
   const favoriteTrees = useMemo(() => sortedTrees.filter((tree) => tree.is_favorite), [sortedTrees]);
   const popupTrees = popupMode === "favorites" ? favoriteTrees : sortedTrees;
 
-  function handleExport() {
+  const handleExport = useCallback(() => {
     setTransferError(null);
     if (!trees.length) return;
     const exportFile = createTreeExport(trees);
@@ -39,7 +39,7 @@ export function HeaderTreeControls() {
     anchor.download = `tree-of-life-${new Date().toISOString().slice(0, 10)}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
-  }
+  }, [trees]);
 
   async function handleImport(file: File | null) {
     if (!file) return;
@@ -104,7 +104,7 @@ export function HeaderTreeControls() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [trees]);
+  }, [handleExport]);
 
   return (
     <div className="header-tree-controls">
