@@ -1,9 +1,11 @@
 import { useAuthStore } from "../store/authStore";
 import { useTreeStore } from "../store/treeStore";
-import { signOut } from "./firebase";
+import { signOutOfGoogle } from "./googleIdentity";
 
 export async function signOutWithAutoExport() {
+  const userId = useAuthStore.getState().user?.uid;
   await useTreeStore.getState().exportChangedSessionTrees();
-  await signOut();
+  signOutOfGoogle(userId);
   useAuthStore.getState().clearUser();
+  await useTreeStore.getState().configurePersistence("guest", null);
 }

@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import type { AuthMode } from "../types/auth";
 import type { NodeActionPosition, TreeDocument, TreeNode } from "../types/tree";
-import { FirestoreTreeRepository } from "../services/firestoreTreeRepository";
+import { DriveTreeRepository } from "../services/driveTreeRepository";
 import { GuestTreeRepository } from "../services/guestTreeRepository";
+import { getDriveAccessToken } from "../services/googleIdentity";
 import type { TreeRepository } from "../services/treeRepository";
 import { autoExportChangedSessionTrees } from "../utils/autoTreeExport";
 import {
@@ -181,7 +182,10 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   error: null,
 
   async configurePersistence(mode, userId) {
-    repository = mode === "authenticated" && userId ? new FirestoreTreeRepository(userId) : guestRepository;
+    repository =
+      mode === "authenticated" && userId
+        ? new DriveTreeRepository(userId, () => getDriveAccessToken(userId, { interactive: false }))
+        : guestRepository;
     set({ mode, userId, activeTree: null, activeTreeId: null, trees: [], hasSessionChanges: false });
     await get().loadTrees();
   },

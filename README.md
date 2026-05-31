@@ -9,7 +9,7 @@ Minimal, responsive tree editor with Google sign-in, guest mode, and a D3 collap
 - React + TypeScript + Vite
 - D3 for SVG tree layout, joins, and transitions
 - Zustand for app state
-- Firebase Auth + Firestore for signed-in persistence
+- Google Identity Services + Google Drive app data for signed-in persistence
 - IndexedDB for guest persistence
 
 ## Setup
@@ -20,7 +20,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Populate `.env` with a Firebase web app config if you want Google login and cloud sync. Guest mode works without Firebase config.
+Populate `.env` with a Google OAuth web client ID if you want Google login and cloud sync. Guest mode works without Google config.
 
 ## Scripts
 
@@ -31,21 +31,10 @@ npm run test
 npm run lint
 ```
 
-## Firebase
+## Google Sync
 
-Expected Firestore path:
-
-```txt
-users/{uid}/trees/{treeId}
-```
-
-Recommended security rule shape:
-
-```txt
-match /users/{uid}/trees/{treeId} {
-  allow read, write: if request.auth != null && request.auth.uid == uid;
-}
-```
+Google login uses Google Identity Services with `VITE_GOOGLE_CLIENT_ID`.
+Signed-in trees are stored in the user's Google Drive app data folder as `tree-of-life-trees.json`.
 
 ## Interaction
 
